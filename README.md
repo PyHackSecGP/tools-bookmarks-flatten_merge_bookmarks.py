@@ -4,12 +4,12 @@ Bookmark Cleanup Tools  Two Python utilities to clean up browser bookmark export
 
 Two Python utilities to clean up browser bookmark exports (`.html` files):
 
-## 1. `dedupe_merge_netscape_bookmarks.py`
+## 1. `dedupe_chromium_bookmarks.py`
 - Removes duplicate URLs.
 - Merges same-named folders (sibling or global with `--merge-scope global`).
 - Writes `*.dedup.html`.
 
-## 2. `flatten_merge_bookmarks.py`
+## 2. `dedupe_merge_netscape_bookmarks`
 - Merges all same-named folders (anywhere).
 - Flattens everything (no subfolders).
 - Removes duplicates globally.
@@ -17,4 +17,4 @@ Two Python utilities to clean up browser bookmark exports (`.html` files):
 
 ### Example
 ```bash
-python3 tools/bookmarks/flatten_merge_bookmarks.py bookmarks.html
+python3 tools/bookmarks/dedupe_merge_netscape_bookmarks bookmarks.html
