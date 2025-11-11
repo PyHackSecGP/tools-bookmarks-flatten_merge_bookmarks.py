@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-"""
-Flatten a Netscape/HTML bookmark export:
-- Merge folders with the same name globally (no matter their parent).
-- Output a single-level structure (no subfolders).
-- De-duplicate bookmarks globally by normalized URL.
-"""
 
 import argparse, os, sys, re
 from html.parser import HTMLParser
@@ -12,7 +6,6 @@ from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple, Dict, Set
 
-# ---------- URL normalization ----------
 
 COMMON_TRACKING_PARAMS = {
     "utm_source","utm_medium","utm_campaign","utm_term","utm_content",
@@ -34,7 +27,6 @@ def normalize_url(u: str) -> str:
     except Exception:
         return u
 
-# ---------- Model ----------
 
 @dataclass
 class Bookmark:
@@ -48,7 +40,6 @@ class Folder:
     attrs: Dict[str, str] = field(default_factory=dict)
     children: List[object] = field(default_factory=list)  # Bookmark | Folder
 
-# ---------- Parser ----------
 
 class NetscapeParser(HTMLParser):
     """
@@ -112,7 +103,6 @@ class NetscapeParser(HTMLParser):
         if self._collect_text_for in ("H3", "A"):
             self._text_buf.append(data)
 
-# ---------- Flatten + merge logic ----------
 
 NBSP = "\u00A0"
 
@@ -163,14 +153,11 @@ def collect_flat_buckets(root: Folder) -> Dict[str, Dict]:
                 b["bookmarks"].append(it)
 
     def walk(node: Folder, parent: Optional[Folder]):
-        # Collect bookmarks directly under this folder into a bucket for this folder's name (except ROOT)
         if node is not root:
             add_to_bucket(node.name, node.attrs, node.children)
         else:
-            # ROOT-level bookmarks (rare) go to Unsorted
             add_to_bucket(None, {}, node.children)
 
-        # Recurse into subfolders to create/merge their own buckets (not nested)
         for ch in node.children:
             if isinstance(ch, Folder):
                 walk(ch, node)
@@ -197,7 +184,6 @@ def dedupe_bookmarks_globally(buckets: Dict[str, Dict]) -> Tuple[Dict[str, Dict]
             stats["folders_total"] += 1
     return buckets, stats
 
-# ---------- Output (one-level only) ----------
 
 def dump_flat_html(buckets: Dict[str, Dict]) -> str:
     lines = []
@@ -241,7 +227,6 @@ def write_flat_file(buckets: Dict[str, Dict], out_path: str):
         f.write(body)
         f.write(footer)
 
-# ---------- CLI ----------
 
 def main():
     ap = argparse.ArgumentParser(description="Flatten bookmarks: merge same-named folders globally, remove subfolders, dedupe URLs.")
